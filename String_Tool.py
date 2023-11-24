@@ -16,19 +16,19 @@ def convert_op(op):
     return op
 
 
-def rand(length):
+def rand_sequence(length):
     import random
     chain = []
-    table = ["A", "K", "M", "S", "V", "P"]
+    table = ['C','M','F','I','L','V','W','Y','A','G','T','S','N','Q','D','E','H','R','K','P']
     for i in range(length):
-        chain.append(table[random.randint(0, 5)])
-    return "".join(chain)
+        chain.append(table[random.randint(0, len(table)-1)])
+    return "".join([table[random.randint(0, len(table)-1)] for i in range(length)])
 
 
 def rand_only(length):
     import random
     chain = []
-    table = ["A", "K", "M", "S", "V", "P"]
+    table = ['C','M','F','I','L','V','W','Y','A','G','T','S','N','Q','D','E','H','R','K','P']
     for i in range(length):
         a = random.choice(table)
         while a in chain:
@@ -36,6 +36,3 @@ def rand_only(length):
         chain.append(a)
 
     return "".join(chain)
-
-
-
