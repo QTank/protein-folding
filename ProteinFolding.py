@@ -6,7 +6,7 @@ import EnergyTable
 from VQE_Qiskit import VQE
 from qiskit.circuit.library import EfficientSU2
 from qiskit.quantum_info import SparsePauliOp
-
+from qiskit.algorithms.optimizers import SLSQP
 from qiskit.algorithms.optimizers import SPSA
 from qiskit.utils import algorithm_globals
 
@@ -161,8 +161,8 @@ class ProteinFold:
         return energy
 
     def hamiltonian_function(self):
-        h = self.back_val() + self.overlap_val() + self.pair_energy()
-        #h = self.back_energy() + self.overlap_energy() + self.pair_energy_new()
+        #h = self.back_val() + self.overlap_val() + self.pair_energy()
+        h = self.back_val() + self.overlap_val() + self.pair_energy_update()
         return self.reduce(h.expand(), self.qubits_used)
 
     def get_hamiltonian(self):
@@ -245,27 +245,19 @@ class ProteinFold:
             op[i] = op[i].replace("0", "I")
         return op
 
-    def fold(self):
+    def fold(self, ansatz, optimizer, initial_point):
         op, co = self.get_index_coefficient()
-        num_qubits = len(op[0])
+
         op = self.convert_op(op)
         co = co[1:]
         ob = SparsePauliOp(op, np.array(co))
-        ansatz = EfficientSU2(num_qubits, reps=2, entanglement='circular', insert_barriers=True)
-        # ansatz = RealAmplitudes(3, entanglement='circular', reps=2, insert_barriers=True)
-        spsa = SPSA(maxiter=50)
-        np.random.seed(10)  # seed for reproducibility
-        initial_point = np.random.random(ansatz.num_parameters)
 
-        seed = 170
-        algorithm_globals.random_seed = seed
-
-        vqe = VQE(ansatz, ob, spsa, initial_point)
+        vqe = VQE(ansatz, ob, optimizer, initial_point)
         theta = vqe.solve().x
         res = vqe.get_expection(theta)
         prob = res.quasi_dists[0]
         prob = dict(sorted(prob.items(), key=lambda x: x[1], reverse=True))
-        count = int(2 ** self.qubits_used * 0.05)
+        count = int(2 ** self.qubits_used * 0.01)
 
         prob = list(prob.items())
         top = prob[:count]
@@ -288,10 +280,14 @@ class ProteinFold:
         for i in range(0, self.N - 3):
             for j in range(i + 3, self.N, 2):
                 # print("interaction ", self.interaction[i][j])
+                amino_index_i = self.index_dict[self.amino_acid_chain[i]]
+                amino_index_j = self.index_dict[self.amino_acid_chain[j]]
+                val = self.energy_table[amino_index_i][amino_index_j] * 10 * 2
                 if j - i + 1 == 4:
-                    energy += self.interaction[i][j] * self.tag_4(i + 1)
+                    energy += val * self.tag_4(i + 1)
                 elif j - i + 1 == 6:
-                    energy += self.interaction[i][j] * self.tag_6(i + 1)
+
+                    energy += val * self.tag_6(i + 1)
 
         return energy
 
