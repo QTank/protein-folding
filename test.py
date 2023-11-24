@@ -42,6 +42,6 @@ if __name__ == "__main__":
     print("The sequence: ", sequence)
     get_figure(amino_sequence, sequence)
 
-    energy = proteinObj.test_energy()
-    for aa, v in energy.items():
-        print(f"int: {int(aa, 2)}, sequence: {aa}, val: {v}")
+    #energy = proteinObj.test_energy()
+    #for aa, v in energy.items():
+    #    print(f"int: {int(aa, 2)}, sequence: {aa}, val: {v}")
