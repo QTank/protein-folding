@@ -243,22 +243,22 @@ class ProteinFold:
 
     def fold(self, ansatz, optimizer, initial_point):
         op, co = self.get_index_coefficient()
-
         op = self.convert_op(op)
-        co = co[1:]
-        ob = SparsePauliOp(op, np.array(co))
+        co = co[1:] # delete the constant
 
+        ob = SparsePauliOp(op, np.array(co))
         vqe = VQE(ansatz, ob, optimizer, initial_point)
         theta = vqe.solve().x
         res = vqe.get_expection(theta)
         prob = res.quasi_dists[0]
         prob = dict(sorted(prob.items(), key=lambda x: x[1], reverse=True))
-        count = int(2 ** self.qubits_used * 0.01)
+        top = max(prob.items(), key=lambda x: x[1])
+        opt_sequence = String_Tool.int_to_binary(top[0], self.qubits_used)
+        return "010%s" % opt_sequence
 
-        prob = list(prob.items())
-        top = prob[:count]
-        opt_sequence = ""
+    def select_opt_sequence(self, top):
         min_val = 10**7
+        opt_sequence = ""
         for each in top:
             sequence = String_Tool.int_to_binary(each[0], self.qubits_used)
             val_hamiltonian = self.binary_to_hval(sequence)
