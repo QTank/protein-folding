@@ -4,11 +4,7 @@ from math import *
 import String_Tool
 import EnergyTable
 from VQE_Qiskit import VQE
-from qiskit.circuit.library import EfficientSU2
 from qiskit.quantum_info import SparsePauliOp
-from qiskit.algorithms.optimizers import SLSQP
-from qiskit.algorithms.optimizers import SPSA
-from qiskit.utils import algorithm_globals
 
 
 class ProteinFold:
