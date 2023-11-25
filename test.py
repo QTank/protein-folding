@@ -20,10 +20,8 @@ def plot_grid_with_arrows_and_text(marked_locations):
         plt.text(x+0.1, y+0.1, str(idx + 1), color='black',
                  ha='center', va='center', fontsize=13)
 
-
-
-
     # Mark the locations with red dots
+
     for location in marked_locations:
         plt.plot(location[0], location[1], 'ro')  # +0.5 to center the marker
 
