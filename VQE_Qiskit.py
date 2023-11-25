@@ -1,6 +1,3 @@
-from qiskit.algorithms.optimizers import SPSA
-from qiskit.quantum_info import SparsePauliOp
-from qiskit.circuit.library import EfficientSU2
 from qiskit.primitives import Estimator
 from qiskit.primitives import Sampler
 
@@ -19,7 +16,6 @@ class VQE:
 
     def get_expection(self, theta):
         sampler = Sampler()
-
         self.ansatz.measure_all()
         task = sampler.run(self.ansatz, theta)
         return task.result()
