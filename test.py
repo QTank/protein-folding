@@ -44,7 +44,7 @@ def test(amino_sequence):
     slsqp = SLSQP()
     sequence = proteinObj.fold(ansatz, slsqp, initial_point)
     print("The sequence: ", sequence)
-    interact_pair = get_interact_pair(proteinObj, amino_sequence)
+    interact_pair = get_interact_pair(proteinObj, sequence[3:], len(amino_sequence))
 
     return sequence, interact_pair
     #energy = proteinObj.test_energy()
@@ -52,11 +52,11 @@ def test(amino_sequence):
     #    print(f"int: {int(aa, 2)}, sequence: {aa}, val: {v}")
 
 
-def get_interact_pair(proteinObj, amino_sequence):
+def get_interact_pair(proteinObj, sequence, amino_len):
     interact = []
-    for i in range(1, len(protein_sequence)-2):
-        for j in range(i+3, len(protein_sequence)+1):
-            d = proteinObj.get_distance(i, j, amino_sequence)
+    for i in range(1, amino_len-2):
+        for j in range(i+3, amino_len+1):
+            d = proteinObj.get_distance(i, j, sequence)
             if d == 1:
                 interact.append((i, j))
     return interact
