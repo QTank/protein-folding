@@ -6,6 +6,50 @@ from qiskit.circuit.library import EfficientSU2
 import numpy as np
 
 
+def plot_grid_with_arrows_and_text(marked_locations):
+    # Mark the locations on the grid
+    for idx, location in enumerate(marked_locations):
+        x, y, direction = location
+
+        # Add arrow to indicate direction
+        if idx != len(marked_locations) - 1:
+            plt.arrow(x, y, *get_arrow_direction(direction, True),
+                  head_width=0.1, head_length=0.1, fc='red', ec='red')
+
+        # Add text with number
+        plt.text(x+0.1, y+0.1, str(idx + 1), color='black',
+                 ha='center', va='center', fontsize=13)
+
+
+
+
+    # Mark the locations with red dots
+    for location in marked_locations:
+        plt.plot(location[0], location[1], 'ro')  # +0.5 to center the marker
+
+    # Customize the plot
+    plt.title('Protein folding')
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    #plt.xticks(range(1 + 1))
+    #plt.yticks(range(1 + 1))
+    for i in range(0,5):
+        plt.scatter(range(0,5), [i]*5, c='b')
+    # Show the plot
+    plt.show()
+
+def get_arrow_direction(direction, b=False):
+    # Define arrow direction based on encoding
+    d = 0.15 if b else 0
+    if direction == '01':
+        return (1-d, 0)
+    elif direction == '10':
+        return (-1+d, 0)
+    elif direction == '11':
+        return (0, 1-d)
+    elif direction == '00':
+        return (0, -1+d)
+
 def get_figure(amino, fold, interact):
     p = [0, 0]
     x, y = [0], [0]
@@ -25,13 +69,29 @@ def get_figure(amino, fold, interact):
         interact_x = [x[each[0]-1], x[each[1]-1]]
         interact_y = [y[each[0]-1], y[each[1]-1]]
         plt.plot(interact_x, interact_y, '--', 'r')
-
+    plt.grid()
     plt.axis('off')
     plt.margins(0.1)  # enough margin so that the large scatter dots don't touch the borders
     plt.gca().set_aspect('equal')
     for i in range(len(amino)):
         plt.text(x[i], y[i] + 0.1, amino[i], fontsize=15)
     plt.show()
+
+
+def plot_structure(amino_sequence, encode_sequence):
+    p = [0, 0, ""]
+    location = []
+    for i in range(len(encode_sequence)//2):
+
+        direction = get_arrow_direction(encode_sequence[2*i:2*i+2])
+        p[2] = encode_sequence[2*i:2*i+2]
+        location.append(p.copy())
+        p[0] = p[0] + direction[0]
+        p[1] = p[1] + direction[1]
+
+    location.append(p.copy())
+
+    plot_grid_with_arrows_and_text(location)
 
 
 def test(amino_sequence):
@@ -62,8 +122,10 @@ def get_interact_pair(proteinObj, sequence, amino_len):
     return interact
 
 
+
 if __name__ == "__main__":
-    protein_sequence = "CYVIRV"
     protein_sequence = "DAYAQW"
-    encode_sequence, interact_pair = test(protein_sequence)
-    get_figure(protein_sequence, encode_sequence, interact_pair)
+    #encode_sequence, interact_pair = test(protein_sequence)
+    encode_sequence = "0100001011"
+    plot_structure(protein_sequence, encode_sequence)
+    #get_figure(protein_sequence, encode_sequence, [])
