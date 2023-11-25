@@ -56,7 +56,7 @@ def get_interact_pair(proteinObj, amino_sequence):
     interact = []
     for i in range(1, len(protein_sequence)-2):
         for j in range(i+3, len(protein_sequence)+1):
-            d = proteinObj.get_distance(i, j, "0100001")
+            d = proteinObj.get_distance(i, j, amino_sequence)
             if d == 1:
                 interact.append((i, j))
     return interact
@@ -64,6 +64,6 @@ def get_interact_pair(proteinObj, amino_sequence):
 
 if __name__ == "__main__":
     protein_sequence = "CYVIRV"
-    #protein_sequence = String_Tool.rand_sequence(7-1)
+    protein_sequence = "DAYAQW"
     encode_sequence, interact_pair = test(protein_sequence)
     get_figure(protein_sequence, encode_sequence, interact_pair)
