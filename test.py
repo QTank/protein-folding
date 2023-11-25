@@ -1,12 +1,12 @@
+import String_Tool
 from ProteinFolding import ProteinFold
 from matplotlib import pyplot as plt
 from qiskit.algorithms.optimizers import SLSQP
-from qiskit.algorithms.optimizers import SPSA
-from qiskit.utils import algorithm_globals
 from qiskit.circuit.library import EfficientSU2
 import numpy as np
 
-def get_figure(amino, fold):
+
+def get_figure(amino, fold, interact):
     p = [0, 0]
     x, y = [0], [0]
 
@@ -18,9 +18,14 @@ def get_figure(amino, fold):
 
         x.append(p[0])
         y.append(p[1])
-
     plt.plot(x, y, '-')
     plt.scatter(x, y, s=200, zorder=3)
+
+    for each in interact:
+        interact_x = [x[each[0]-1], x[each[1]-1]]
+        interact_y = [y[each[0]-1], y[each[1]-1]]
+        plt.plot(interact_x, interact_y, '--', 'r')
+
     plt.axis('off')
     plt.margins(0.1)  # enough margin so that the large scatter dots don't touch the borders
     plt.gca().set_aspect('equal')
@@ -29,8 +34,7 @@ def get_figure(amino, fold):
     plt.show()
 
 
-if __name__ == "__main__":
-    amino_sequence = "PSVKMA"
+def test(amino_sequence):
     proteinObj = ProteinFold(amino_sequence)
     num_qubits = proteinObj.qubits_used
     ansatz = EfficientSU2(num_qubits, reps=2, entanglement='circular', insert_barriers=True)
@@ -40,8 +44,26 @@ if __name__ == "__main__":
     slsqp = SLSQP()
     sequence = proteinObj.fold(ansatz, slsqp, initial_point)
     print("The sequence: ", sequence)
-    get_figure(amino_sequence, sequence)
+    interact_pair = get_interact_pair(proteinObj, amino_sequence)
 
+    return sequence, interact_pair
     #energy = proteinObj.test_energy()
     #for aa, v in energy.items():
     #    print(f"int: {int(aa, 2)}, sequence: {aa}, val: {v}")
+
+
+def get_interact_pair(proteinObj, amino_sequence):
+    interact = []
+    for i in range(1, len(protein_sequence)-2):
+        for j in range(i+3, len(protein_sequence)+1):
+            d = proteinObj.get_distance(i, j, "0100001")
+            if d == 1:
+                interact.append((i, j))
+    return interact
+
+
+if __name__ == "__main__":
+    protein_sequence = "CYVIRV"
+    #protein_sequence = String_Tool.rand_sequence(7-1)
+    encode_sequence, interact_pair = test(protein_sequence)
+    get_figure(protein_sequence, encode_sequence, interact_pair)
