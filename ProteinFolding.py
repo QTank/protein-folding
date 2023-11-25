@@ -251,7 +251,6 @@ class ProteinFold:
         theta = vqe.solve().x
         res = vqe.get_expection(theta)
         prob = res.quasi_dists[0]
-        prob = dict(sorted(prob.items(), key=lambda x: x[1], reverse=True))
         top = max(prob.items(), key=lambda x: x[1])
         opt_sequence = String_Tool.int_to_binary(top[0], self.qubits_used)
         return "010%s" % opt_sequence
@@ -266,6 +265,13 @@ class ProteinFold:
                 min_val = val_hamiltonian
                 opt_sequence = sequence
         return "010%s" % opt_sequence
+
+    # compute the val of distance between ith and jth amino acid
+    def get_distance(self, i, j, binary_string):
+        d = self.distance(i, j)
+        for i in range(len(binary_string)):
+            d = d.subs(self.qubits[i+1], binary_string[i])
+        return d
 
     # update the method of computing interaction energy between the pair of amino acids, but it does not work now
     def pair_energy_update(self):
