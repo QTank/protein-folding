@@ -1,4 +1,3 @@
-import String_Tool
 from ProteinFolding import ProteinFold
 from matplotlib import pyplot as plt
 from qiskit.algorithms.optimizers import SLSQP
@@ -6,7 +5,7 @@ from qiskit.circuit.library import EfficientSU2
 import numpy as np
 
 
-def plot_grid_with_arrows_and_text(marked_locations):
+def plot_grid_with_arrows_and_text(amino_sequence, marked_locations, range_distance, interact):
     # Mark the locations on the grid
     for idx, location in enumerate(marked_locations):
         x, y, direction = location
@@ -17,24 +16,26 @@ def plot_grid_with_arrows_and_text(marked_locations):
                   head_width=0.1, head_length=0.1, fc='red', ec='red')
 
         # Add text with number
-        plt.text(x+0.1, y+0.1, str(idx + 1), color='black',
+        plt.text(x+0.1, y+0.1, str(amino_sequence[idx]), color='black',
                  ha='center', va='center', fontsize=13)
 
     # Mark the locations with red dots
-
-    for location in marked_locations:
-        plt.plot(location[0], location[1], 'ro')  # +0.5 to center the marker
-
     # Customize the plot
     plt.title('Protein folding')
     plt.xlabel('X-axis')
     plt.ylabel('Y-axis')
-    #plt.xticks(range(1 + 1))
-    #plt.yticks(range(1 + 1))
-    for i in range(0,5):
-        plt.scatter(range(0,5), [i]*5, c='b')
+
+    for each in interact:
+        interact_x = [marked_locations[each[0]-1][0], marked_locations[each[1]-1][0]]
+        interact_y = [marked_locations[each[0]-1][1], marked_locations[each[1]-1][1]]
+        plt.plot(interact_x, interact_y, '--', c='y')
+
+    for i in range(range_distance[2], range_distance[3]):
+        x_range = range(range_distance[0], range_distance[1])
+        plt.scatter(x_range, [i]*len(x_range), c='b')
     # Show the plot
     plt.show()
+
 
 def get_arrow_direction(direction, b=False):
     # Define arrow direction based on encoding
@@ -47,6 +48,7 @@ def get_arrow_direction(direction, b=False):
         return (0, 1-d)
     elif direction == '00':
         return (0, -1+d)
+
 
 def get_figure(amino, fold, interact):
     p = [0, 0]
@@ -76,9 +78,10 @@ def get_figure(amino, fold, interact):
     plt.show()
 
 
-def plot_structure(amino_sequence, encode_sequence):
+def plot_structure(amino_sequence, encode_sequence, interact):
     p = [0, 0, ""]
     location = []
+
     for i in range(len(encode_sequence)//2):
 
         direction = get_arrow_direction(encode_sequence[2*i:2*i+2])
@@ -89,7 +92,11 @@ def plot_structure(amino_sequence, encode_sequence):
 
     location.append(p.copy())
 
-    plot_grid_with_arrows_and_text(location)
+    x_range = [row[0] for row in location]
+    second_range = [row[1] for row in location]
+
+    range_distance = [min(x_range)-1, max(x_range)+2, min(second_range)-1, max(second_range)+2]
+    plot_grid_with_arrows_and_text(amino_sequence, location, range_distance, interact)
 
 
 def test(amino_sequence):
@@ -104,10 +111,10 @@ def test(amino_sequence):
     print("The sequence: ", sequence)
     interact_pair = get_interact_pair(proteinObj, sequence[3:], len(amino_sequence))
 
+    energy = proteinObj.test_energy()
+    for aa, v in energy.items():
+        print(f"int: {int(aa, 2)}, sequence: {aa}, val: {v}")
     return sequence, interact_pair
-    #energy = proteinObj.test_energy()
-    #for aa, v in energy.items():
-    #    print(f"int: {int(aa, 2)}, sequence: {aa}, val: {v}")
 
 
 def get_interact_pair(proteinObj, sequence, amino_len):
@@ -120,10 +127,7 @@ def get_interact_pair(proteinObj, sequence, amino_len):
     return interact
 
 
-
 if __name__ == "__main__":
-    protein_sequence = "DAYAQW"
-    #encode_sequence, interact_pair = test(protein_sequence)
-    encode_sequence = "0100001011"
-    plot_structure(protein_sequence, encode_sequence)
-    #get_figure(protein_sequence, encode_sequence, [])
+    protein_sequence = "YYDPETGT"#"DAYAQW"YYDPETGTWY
+    encode_sequence, interact_pair = test(protein_sequence)
+    plot_structure(protein_sequence, encode_sequence, interact_pair)
