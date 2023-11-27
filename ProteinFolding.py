@@ -53,21 +53,21 @@ class ProteinFold:
     # encode the left direction in x-axis on the step
     def direction_x_left(self, step):
         if step == 1 or step == 2:
-            return 0
+            return 1
 
         return self.qubits[2 * step - 4] * (1 - self.qubits[2 * step - 3])
 
     # encode the up direction in y-axis on the step
     def direction_y_up(self, step):
         if step == 1 or step == 2:
-            return 0
+            return 1
 
         return self.qubits[2 * step - 4] * self.qubits[2 * step - 3]
 
     # encode the down direction in y-axis on the step
     def direction_y_down(self, step):
         if step == 1:
-            return 0
+            return 1
 
         if step == 2:
             return 1 - self.qubits[1]
@@ -152,8 +152,12 @@ class ProteinFold:
                 amino_index_i = self.index_dict[self.amino_acid_chain[i]]
                 amino_index_j = self.index_dict[self.amino_acid_chain[j]]
                 val = self.energy_table[amino_index_i][amino_index_j] * 10
-                energy += val * (2 - self.distance(i + 1, j + 1))
+                #energy += val * (2 - self.distance(i + 1, j + 1))
+                d = self.distance(i+1, j+1)
+                dd = (10-d)*(5-d)*(2-d)*0.11*0.25 + (10-d)*(5-d)*(d-1)*0.125*0.33 * 0.25 \
+                    + (10-d)*(d-2)*(d-1)*0.5*0.33*0.25 * 0.125 * 0.125 + (d-5)*(d-2)*(d-1)*0.5*0.128*0.11 * 0.1 **2
 
+                energy += val * (dd*d)
         return energy
 
     def hamiltonian_function(self):
@@ -370,6 +374,6 @@ class ProteinFold:
 
 
 if __name__ == '__main__':
-    pass
-
+    test = ProteinFold("YYPDETET")
+    print(test.tag_8(1))
 
