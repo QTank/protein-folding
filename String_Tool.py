@@ -36,3 +36,43 @@ def rand_only(length):
         chain.append(a)
 
     return "".join(chain)
+
+def is_valid_move(x, y, n, path):
+    return -n <= x <= n and -n <= y <= n and (x, y) not in path and (x, y) not in [(0,0)]
+
+def find_paths(x, y, dest_x, dest_y, length, path=[], paths=[]):
+    if length == 0 and x == dest_x and y == dest_y:
+        paths.append(path.copy())
+        return
+    n = 2
+
+    for nx, ny in [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]:
+        if is_valid_move(nx, ny, n, path):
+            path.append((nx, ny))
+            find_paths(nx, ny, dest_x, dest_y, length - 1, path, paths)
+            path.pop()
+
+
+def add_direction(location):
+    start = (0,0)
+    loc_with_direction = []
+
+    for idx, loc in enumerate(location):
+
+        if idx != 0:
+            start = location[idx-1]
+        direction = ""
+        x = loc[0] - start[0]
+        y = loc[1] - start[1]
+        if x == 1 and y == 0:
+            direction = "01"
+        elif x == -1 and y == 0:
+            direction = "10"
+        elif x == 0 and y == 1:
+            direction = "11"
+        else:
+            direction = "00"
+
+        loc_with_direction.append((start[0], start[1], direction))
+
+    return loc_with_direction
