@@ -32,8 +32,9 @@ def get_interaction_pair(sequence):
 if __name__ == '__main__':
     protein_sequence = "YYDPETGT" # 00 01 11 01 11 10 10     00 01 11 11 10 10 00 01 00
     encoding_string = solution(protein_sequence)
-    interaction = get_interaction_pair("00011101111010")
 
+
+    interaction = get_interaction_pair(encoding_string)
     plot_protein_folding.plot_structure(protein_sequence, encoding_string, interaction)
 
 
