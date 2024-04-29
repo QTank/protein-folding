@@ -2,11 +2,16 @@ import time, VQE, util
 from protein_folding import ProteinFolding
 import plot_protein_folding
 
-
+from Test import qubit_fixing
+from Test import qubit_number_reducer
 def solution(protein_sequence):
     start_time = time.time()
     folding = ProteinFolding(protein_sequence)
     qubit_op = folding.get_qubit_op()
+    # qubit_op = qubit_fixing._fix_qubits(qubit_op)
+    # qubit_op, unused_qubit = qubit_number_reducer.remove_unused_qubits(qubit_op)
+    count_pauli_z = util.count_pauli_z(qubit_op)
+    print("count of z gates: ", count_pauli_z)
     print("start to execute VQE ... ")
     opt_bitstring, opt_value = VQE.get_min(qubit_op)
     executing_time = round(time.time() - start_time, 2)
@@ -30,10 +35,10 @@ def get_interaction_pair(sequence):
 
 
 if __name__ == '__main__':
-    protein_sequence = "YYDPETGT" # 00 01 11 01 11 10 10     00 01 11 11 10 10 00 01 00
-    encoding_string = solution(protein_sequence)
+    protein_sequence = "YTDPETGT" # 00 01 11 01 11 10 10     00 01 11 11 10 10 00 01 00
 
-
+    encoding_string = solution(protein_sequence)#"00011101111010"#
+    # encoding_string = "111%s" % encoding_string #01001010110101
     interaction = get_interaction_pair(encoding_string)
     plot_protein_folding.plot_structure(protein_sequence, encoding_string, interaction)
 

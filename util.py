@@ -187,6 +187,16 @@ def calculate_position(encoding_sequence):
         point.append(cur_point)
     return point
 
+def count_pauli_z(operator):
+    count = 0
+    for hamiltonian in operator:
+        table_z = np.copy(hamiltonian.primitive.paulis.z[0])
+        for i in range(len(table_z)):
+            if table_z[i] == True:
+                count += 1
+
+    return count
+
 
 
 

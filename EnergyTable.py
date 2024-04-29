@@ -22,3 +22,24 @@ def read_data():
                 energy[j][i] = min(energy[i][j], energy[j][i])
     return energy, index_dict
 
+
+def read_energy_data(energy_name):
+    energy = np.zeros((20, 20))
+    index_dict = {}
+
+    with open(energy_name, "r") as f:
+        csv_reader = csv.reader(f, delimiter=",")
+        line = 0
+        for each in csv_reader:
+            for i in range(1, len(each)):
+                energy[line][i-1] = float(each[i])
+
+            index_dict[each[0]] = line
+            line += 1
+
+        for i in range(20):
+            for j in range(i, 20):
+                energy[i][j] = min(energy[i][j], energy[j][i])
+                energy[j][i] = min(energy[i][j], energy[j][i])
+    return energy, index_dict
+

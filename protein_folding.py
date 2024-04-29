@@ -10,7 +10,7 @@ class ProteinFolding:
         self.protein_len = len(protein_sequence)
         self.used_qubit_len = 2*self.protein_len - 2
         self.lamda_overlap = 311000
-        self.lamda_energy = 100*2
+        self.lamda_energy = 100
         self.energy_table, self.index_dict = EnergyTable.read_data()
         self.bead_list = self.set_bead_list()
         self.identity = util.build_full_identity(self.used_qubit_len)
@@ -69,7 +69,7 @@ class ProteinFolding:
 
     def get_h_back(self):
         h_back = 0
-        for i in range(2, self.protein_len-1):
+        for i in range(0, self.protein_len-2):
             h_back += self.back_item(i)
 
         return h_back.reduce() * self.lamda_overlap
@@ -118,7 +118,7 @@ class ProteinFolding:
             h_counterclockwise_2 = self.identity
             h_clockwise_2 = self.identity
             for bead_loc in range(6):
-                bead_turn = self.bead_list[index + bead_loc].get_turn()[turn_counterclockwise[(i+bead_loc) % 4]]
+                bead_turn = self.bead_list[index + bead_loc].get_turn()[turn_clockwise[(i+bead_loc) % 6]]
                 h_clockwise @= bead_turn
 
                 bead_turn = self.bead_list[index + bead_loc].get_turn()[turn_counterclockwise[(i+bead_loc) % 6]]
@@ -143,9 +143,15 @@ class ProteinFolding:
                 amino_index_j = self.index_dict[self.protein_sequence[j]]
                 val = self.energy_table[amino_index_i][amino_index_j]
                 if j - i + 1 == 4:
+                    print(f"The interaction i, j: {i} and {j}, {self.protein_sequence[i]}, {self.protein_sequence[j]}, {val}")
                     h_energy += self.tag_4(i) * val
                 if j - i + 1 == 6:
+                    print(f"The interaction i, j: {i} and {j}, {self.protein_sequence[i]}, {self.protein_sequence[j]}, {val}")
                     h_energy += self.tag_6(i) * val
+
+                if j - i + 1 == 8:
+                    # print(f"The interaction i, j: {i} and {j}, {self.protein_sequence[i]}, {self.protein_sequence[j]}, {val}")
+                    h_energy += self.tag_8(i) * val
 
         return h_energy.reduce() * self.lamda_energy
 
@@ -162,13 +168,13 @@ class ProteinFolding:
             h_counterclockwise = self.identity
             h_clockwise = self.identity
             for bead_loc in range(3):
-                bead_turn = self.bead_list[index + bead_loc].get_turn()[turn_counterclockwise[(i+bead_loc) % 4]]
-                h_counterclockwise @= bead_turn
+                bead_turn_counter = self.bead_list[index + bead_loc].get_turn()[turn_counterclockwise[(i+bead_loc) % 4]]
+                h_counterclockwise @= bead_turn_counter
 
                 bead_turn = self.bead_list[index + bead_loc].get_turn()[turn_clockwise[(i+bead_loc) % 4]]
                 h_clockwise @= bead_turn
 
-            h += h_counterclockwise + h_counterclockwise
+            h += h_counterclockwise + h_clockwise
         return h.reduce()
 
     def tag_6(self, index):
@@ -201,9 +207,62 @@ class ProteinFolding:
 
         return h.reduce()
 
+    def tag_8(self, index):
+        if index + 7 > self.protein_len:
+            return 0
+
+        h = 0
+        turn_order_all = []
+        turn_order_0 = [0, 1, 3, 1, 3, 2, 2, 0]
+        turn_order_all.append(turn_order_0)
+        turn_order_all.append(turn_order_0[::-1])
+        turn_order_1 = [1, 0, 1, 3, 3, 2, 2, 0]
+        turn_order_all.append(turn_order_1)
+        turn_order_all.append(turn_order_1[::-1])
+        turn_order_2 = [1, 1, 1, 3, 2, 2, 2, 0]
+        turn_order_all.append(turn_order_2)
+        turn_order_all.append(turn_order_2[::-1])
+        # turn_order_3 = [1, 1, 3, 2, 3, 2, 0, 0]
+        # turn_order_all.append(turn_order_3)
+        # turn_order_all.append(turn_order_3[::-1])
+        # turn_order_4 = [1, 3, 1, 3, 2, 2, 0, 0]
+        # turn_order_all.append(turn_order_4)
+        # turn_order_all.append(turn_order_4[::-1])
+        # turn_order_5 = [1, 3, 3, 3, 2, 0, 0, 0]
+        # turn_order_all.append(turn_order_5)
+        # turn_order_all.append(turn_order_5[::-1])
+        print("turn_order_all", turn_order_all)
+        for i in range(len(turn_order_0)):
+            h_list = [self.identity] * (len(turn_order_all))
+            # for h_loc in range(len(h_list)):
+            #     turn_order_loc = turn_order_all[h_loc]
+            #
+            #     for bead_loc in range(7):
+            #         bead_turn = self.bead_list[index+bead_loc].get_turn()[turn_order_loc[(i+bead_loc) % 8]]
+            #         h_list[h_loc] @= bead_turn
+
+
+
+
+
+
+
+
+            for bead_loc in range(7):
+                all_turn = self.bead_list[index+bead_loc].get_turn()
+                for h_loc in range(len(h_list)):
+                    bead_turn = all_turn[turn_order_all[h_loc][(i+bead_loc)%8]]
+                    h_list[h_loc] @= bead_turn
+
+            h += sum(h_list)
+
+        return h.reduce()
+
     def get_qubit_op(self):
         print(f"construct the energy Hamiltonian")
         start_time = time.time()
         h = self.get_h_back() + self.get_h_overlap() + self.get_pair_interaction()
+        # h = self.get_h_back() + self.get_pair_interaction()
+        # h = self.get_h_back()
         print(f"the constructing time: {round(time.time() - start_time, 2)} s")
         return h.reduce()

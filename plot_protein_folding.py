@@ -31,7 +31,6 @@ def plot_grid_with_arrows_and_text(amino_sequence, marked_locations, range_dista
         plt.scatter(x_range, [i]*len(x_range), c='b')
 
     plt.legend()
-
     # Show the plot
     plt.show()
 
