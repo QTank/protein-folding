@@ -130,4 +130,5 @@ def get_interact_pair(proteinObj, sequence, amino_len):
 if __name__ == "__main__":
     protein_sequence = "YYDPETGT"#"DAYAQW"YYDPETGTWY
     encode_sequence, interact_pair = test(protein_sequence)
+    encode_sequence, interact_pair = "010010101101010010", []#"01000000101110", []
     plot_structure(protein_sequence, encode_sequence, interact_pair)
