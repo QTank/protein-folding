@@ -1,2 +1,2 @@
-# VQE on protein-folding on a planar lattice model
-
+# Quantum protein-folding on a planar lattice model with VQE
+The method is from the paper https://www.nature.com/articles/srep00571. This paper provides a method for mapping protein construction to qubit and folding protein on a planar lattice model on quantum annealing. My code constructed the Hamiltonian according to the paper but VQE was utilized on quantum protein folding because it used less qubit than quantum annealing. 
